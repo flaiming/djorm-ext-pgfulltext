@@ -273,7 +273,7 @@ class SearchQuerySet(QuerySet):
 
     def search(self, query, rank_field=None, rank_function='ts_rank', config=None,
                rank_normalization=32, raw=False, using=None, fields=None,
-               headline_field=None, headline_document=None):
+               headline_field=None, headline_document=None, search_field=None):
         '''
         Convert query with to_tsquery or plainto_tsquery, depending on raw is
         `True` or `False`, and return a QuerySet with the filter.
@@ -315,9 +315,11 @@ class SearchQuerySet(QuerySet):
                 "%s('%s', %s)" % (function, config, adapt(query))
             )
 
+            search_field = search_field or self.manager.search_field
+
             full_search_field = "%s.%s" % (
                 qn(self.model._meta.db_table),
-                qn(self.manager.search_field)
+                qn(search_field)
             )
 
             # if fields is passed, obtain a vector expression with
@@ -326,7 +328,7 @@ class SearchQuerySet(QuerySet):
             if fields:
                 search_vector = self.manager._get_search_vector(config, using, fields=fields)
             else:
-                if not self.manager.search_field:
+                if not search_field:
                     raise ValueError("search_field is not specified")
 
                 search_vector = full_search_field

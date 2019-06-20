@@ -1,7 +1,7 @@
 import psycopg2
 
 from django.db import connection
-from django.utils.text import force_text
+from django.utils.encoding import force_text
 
 
 def adapt(text):
